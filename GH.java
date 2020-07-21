@@ -15,5 +15,8 @@ public static void main(String[] args){
  public void getRequest() throws Exception{
    HttpURLConnection c = (HttpURLConnection) getUrl().openConnection();
    c.setRequestMethod("GET");
+   BufferedReader in = new BufferedReader (new InputStreamReader(con.getInputStream()));
+   String inputLine;
+   StringBuffer response = new StringBuffer();
  }
 }
