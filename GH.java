@@ -1,51 +1,44 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import org.json.simple.*;
+import org.json.simple.parser.*;
 
 public class GH {
 
- public static void main(String[] args) throws IOException{
-  //getRequest();
-  getContributors();
+ static List <String> repos = new ArrayList <> ();
+
+ public static void main(String[] args) throws IOException, ParseException{
+  getRepos();
+  System.out.println(repos.get(1));
+
 
  }
 
-/* public static void getRequest() throws IOException{
+ public static void getRepos() throws IOException, ParseException {
 
-   URL u = new URL("https://api.github.com/users/d3/repos");
-   HttpURLConnection c = (HttpURLConnection) u.openConnection();
-   c.setRequestMethod("GET");
-   BufferedReader in = new BufferedReader(new InputStreamReader(c.getInputStream()));
-   BufferedWriter f = new BufferedWriter(new FileWriter(new File("d3.txt")));
-   String inputLine;
-   StringBuffer response = new StringBuffer();
-    while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        String s = response.toString();
-        in.close();
-        f.write(s);
-        f.close();
-  }*/
+  URL url = new URL( "https://api.github.com/users/d3/repos");
+  HttpURLConnection c = (HttpURLConnection) url.openConnection();
+  c.setRequestMethod("GET");
 
-   public static void getContributors() throws IOException{
+  StringBuilder b = new StringBuilder();
 
-       URL u2 = new URL("https://api.github.com/users/d3/repos/d3/stats/contributors");
-       HttpURLConnection c2 = (HttpURLConnection) u2.openConnection();
-       c2.setRequestMethod("GET");
-       BufferedReader in2 = new BufferedReader(new InputStreamReader(c2.getInputStream()));
-       BufferedWriter f2 = new BufferedWriter(new FileWriter(new File("d3cons.txt")));
-       String inputLine;
-       StringBuffer response = new StringBuffer();
-        while ((inputLine = in2.readLine()) != null) {
-                response.append(inputLine);
-            }
-            String s = response.toString();
-            in2.close();
-            f2.write(s);
-            f2.close();
+  String line;
+  BufferedReader in = new BufferedReader(new InputStreamReader(c.getInputStream()));
+   while ((line = in.readLine()) != null)
+     b.append(line);
+   in.close();
 
-
+  c.disconnect();
+   JSONObject o;
+   JSONParser p  = new JSONParser();
+   JSONArray j = (JSONArray) p.parse(b.toString());
+  for (Object value : j) {
+    o = (JSONObject) value;
+    String s = (String) o.get("name");
+    repos.add(s);
   }
 
+
+ }
  }
