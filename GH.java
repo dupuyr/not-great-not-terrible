@@ -6,22 +6,23 @@ import org.json.simple.parser.*;
 
 public class GH {
 
- public class Week{
+ public static class Repos{
 
-  public Week(){
+  public Repos(String repo, JSONArray a){
 
-   String repo;
-   List<JSONArray> Weeks;
-   String user;
+   String rep = repo;
+   JSONArray Weeks = a;
   }
  }
 
  static List <String> repos = new ArrayList <> ();
  static List <JSONArray> stats = new ArrayList <>();
+ static List <Repos> repoStats = new ArrayList <>();
 
  public static void main(String[] args) throws IOException, ParseException{
   getRepos();
   getStats();
+  getRepoStats();
 
 
 
@@ -87,8 +88,15 @@ public class GH {
 
   }
 
-  public static void getWeeks() {
+  public static void getRepoStats() {
 
+    for(String re: repos) {
+     for (JSONArray a : stats) {
+      Repos r = new Repos(re, a);
+      repoStats.add(r);
+
+     }
+    }
 
   }
 
