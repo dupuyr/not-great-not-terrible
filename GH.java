@@ -6,11 +6,23 @@ import org.json.simple.parser.*;
 
 public class GH {
 
+ public class Week{
+
+  public Week(){
+
+   String repo;
+   List<JSONArray> Weeks;
+   String user;
+  }
+ }
+
  static List <String> repos = new ArrayList <> ();
+ static List <JSONArray> stats = new ArrayList <>();
 
  public static void main(String[] args) throws IOException, ParseException{
   getRepos();
-  System.out.println(repos.get(1));
+  getStats();
+
 
 
  }
@@ -41,4 +53,46 @@ public class GH {
 
 
  }
+
+ public static void getStats () throws IOException, ParseException {
+
+  for (String repo : repos) {
+       parseArrays(repo);
+  }
+
+ }
+
+
+
+  public static void parseArrays(String repo) throws IOException, ParseException{
+
+   URL u;
+   HttpURLConnection h;
+   StringBuilder s = new StringBuilder();
+   BufferedReader r;
+   String l;
+   u = new URL("https://api.github.com/repos/d3/" + repo + "/stats/contributors");
+   h = (HttpURLConnection) u.openConnection();
+   h.setRequestMethod("GET");
+   r = new BufferedReader(new InputStreamReader(h.getInputStream()));
+   while ((l = r.readLine()) != null) {
+    s.append(l);
+   }
+   r.close();
+   h.disconnect();
+   JSONParser parser = new JSONParser();
+   JSONArray a = (JSONArray) parser.parse(s.toString());
+   stats.add(a);
+
+
+  }
+
+  public static void getWeeks() {
+
+
+  }
+
+
+
+
  }
