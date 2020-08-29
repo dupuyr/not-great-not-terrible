@@ -14,7 +14,7 @@ public class GH {
   Repos contributedTo;
   String name;
   JSONArray weeks;
-  List<Month> months = new ArrayList <> ();
+  List<Month> months;
 
 
   public Cons(Object o, Repos r) {
@@ -23,6 +23,8 @@ public class GH {
    this.contributedTo = r;
    this.name = (String) b.get("login");
    this.weeks = (JSONArray) b.get("weeks");
+   months = new ArrayList<> ();
+
   }
 
   public static Month convertMonth(Month m){
@@ -41,11 +43,14 @@ public class GH {
 
   static String rep;
   static JSONArray w;
+  static List<Cons> cons;
 
   public Repos(String repo, JSONArray a) {
 
    this.rep = repo;
    this.w = a;
+   cons = new ArrayList <>();
+
   }
 
  }
@@ -76,6 +81,7 @@ public class GH {
   getRepoStats();
   getCons();
   calculateLines();
+  getExactMonth();
 
 
  }
@@ -184,8 +190,34 @@ public class GH {
 
 
    }
+     assignToRepo();
   }
- }
+
+   public static void assignToRepo() {
+
+       for(Cons c : contributors){
+          Repos r = c.contributedTo;
+          r.cons.add(c);
+       }
+
+   }
+
+   public static void getExactMonth(){
+
+      for(Repos r: repoStats){
+        for(Month m : r.cons.get(0).months){
+          getTopCons(m.date,r);
+        }
+      }
+
+   }
+
+   public static void getTopCons(String m, Repos r){
+
+
+   }
+  }
+
 
 
 
