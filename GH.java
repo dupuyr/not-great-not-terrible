@@ -8,7 +8,7 @@ import java.text.SimpleDateFormat;
 
 public class GH {
 
-  // class for creating contributor object
+ // class for creating contributor object
  public static class Cons {
   // variables for repo contributed to, con name, weeks they've contributed, monthly contribution.
   Repos contributedTo;
@@ -23,13 +23,13 @@ public class GH {
    this.contributedTo = r;
    this.name = (String) b.get("login");
    this.weeks = (JSONArray) b.get("weeks");
-   months = new ArrayList<> ();
+   months = new ArrayList<>();
 
   }
 
-  public static Month convertMonth(Month m){
+  public static Month convertMonth(Month m) {
 
-   Instant i = Instant.ofEpochSecond(m.month*1000);
+   Instant i = Instant.ofEpochSecond(m.month * 1000);
    Date d = Date.from(i);
    SimpleDateFormat formatter = new SimpleDateFormat("MM/yyyy");
    String dt = formatter.format(d);
@@ -44,14 +44,17 @@ public class GH {
   static String rep;
   static JSONArray w;
   static List<Cons> cons;
+  static List<Month> topMonth;
 
   public Repos(String repo, JSONArray a) {
 
    this.rep = repo;
    this.w = a;
-   cons = new ArrayList <>();
+   cons = new ArrayList<>();
+   topMonth = new ArrayList<>();
 
   }
+
 
  }
 
@@ -60,12 +63,28 @@ public class GH {
   static long codeLines;
   static long month;
   static String date;
+  static long t;
+  static long s;
+  static long th;
+  static long f;
+  static long fth;
+  static List<String> top5;
 
   public Month(long code, long month) {
 
    this.codeLines = code;
    this.month = month;
 
+  }
+
+  public Month(String date, long top, long sec, long thd, long fth, long th) {
+   this.date = date;
+   this.t = top;
+   this.s = sec;
+   this.th = thd;
+   this.f = fth;
+   this.fth = th;
+   top5 = new ArrayList<>();
   }
  }
 
@@ -175,48 +194,89 @@ public class GH {
    for (Object o : c.weeks) {
     JSONObject j;
     j = (JSONObject) o;
-     if (m < 2419200) {
-      code += (long ) j.get("a");
-      m += 604800;
-     }
-      else if (m == 2419200) {
-       Month mth = new Month(code, (long) j.get("w"));
-       c.months.add(c.convertMonth(mth));
-       //System.out.println( c.months.get(0)+ " " + code);
-       code = 0;
-       m = 0;
-      }
+    if (m < 2419200) {
+     code += (long) j.get("a");
+     m += 604800;
+    } else if (m == 2419200) {
+     Month mth = new Month(code, (long) j.get("w"));
+     c.months.add(c.convertMonth(mth));
+     //System.out.println( c.months.get(0)+ " " + code);
+     code = 0;
+     m = 0;
     }
-
-
    }
-     assignToRepo();
+
+
+  }
+  assignToRepo();
+ }
+
+ public static void assignToRepo() {
+
+  for (Cons c : contributors) {
+   Repos r = c.contributedTo;
+   r.cons.add(c);
   }
 
-   public static void assignToRepo() {
+ }
 
-       for(Cons c : contributors){
-          Repos r = c.contributedTo;
-          r.cons.add(c);
-       }
+ public static void getExactMonth() {
 
-   }
-
-   public static void getExactMonth(){
-
-      for(Repos r: repoStats){
-        for(Month m : r.cons.get(0).months){
-          getTopCons(m.date,r);
-        }
-      }
-
-   }
-
-   public static void getTopCons(String m, Repos r){
-
-
+  for (Repos r : repoStats) {
+   for (Month m : r.cons.get(0).months) {
+    getTopCons(m.date, r);
    }
   }
+
+ }
+
+ public static void getTopCons(String m, Repos r) {
+
+  long top = 0;
+  long second = 0;
+  long third = 0;
+  long fourth = 0;
+  long fifth = 0;
+  Month mo = new Month(m, top, second, third, fourth, fifth);
+  r.topMonth.add(mo);
+  for (Cons c : r.cons) {
+   for (Month mt : c.months) {
+    if (mt.date.equals(m)) {
+     if (mt.codeLines > top) {
+      top = mt.codeLines;
+      mo.t = top;
+      mo.top5.set(0, c.name);
+
+     } else if (mt.codeLines < top && mt.codeLines > second && mt.codeLines > third
+             && mt.codeLines > fourth && mt.codeLines > fifth) {
+      second = mt.codeLines;
+      mo.s = second;
+      mo.top5.set(1,c.name);
+
+     } else if (mt.codeLines < top && mt.codeLines < second && mt.codeLines > third
+             && mt.codeLines > fourth && mt.codeLines > fifth) {
+      third = mt.codeLines;
+      mo.th = third;
+      mo.top5.set(2,c.name);
+
+     } else if (mt.codeLines < top && mt.codeLines < second && mt.codeLines < third
+             && mt.codeLines > fourth && mt.codeLines > fifth) {
+      fourth = mt.codeLines;
+      mo.f = fourth;
+      mo.top5.set(3,c.name);
+
+     } else if (mt.codeLines < top && mt.codeLines < second && mt.codeLines < third
+             && mt.codeLines < fourth && mt.codeLines > fifth) {
+      fifth = mt.codeLines;
+      mo.fth = fifth;
+      mo.top5.set(4,c.name);
+     }
+    }
+   }
+
+  }
+ }
+}
 
 
 
