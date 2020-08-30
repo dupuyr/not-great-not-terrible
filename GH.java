@@ -5,6 +5,7 @@ import org.json.simple.*;
 import org.json.simple.parser.*;
 import java.time.*;
 import java.text.SimpleDateFormat;
+import com.opencsv.*;
 
 public class GH {
 
@@ -15,8 +16,10 @@ public class GH {
   String name;
   JSONArray weeks;
   List<Month> months;
+  long lines;
 
 
+  //creating Cons object containing repo, their name, weeks active, activity for each month
   public Cons(Object o, Repos r) {
    JSONObject b;
    b = (JSONObject) o;
@@ -25,8 +28,14 @@ public class GH {
    this.weeks = (JSONArray) b.get("weeks");
    months = new ArrayList<>();
 
+
   }
 
+  public Cons() {
+   this.lines = 0;
+  }
+
+  //converting unix to readable date for each month
   public static Month convertMonth(Month m) {
 
    Instant i = Instant.ofEpochSecond(m.month * 1000);
@@ -38,7 +47,7 @@ public class GH {
   }
  }
 
-
+ //class for repositories
  public static class Repos {
 
   static String rep;
@@ -46,12 +55,14 @@ public class GH {
   static List<Cons> cons;
   static List<Month> topMonth;
 
+
   public Repos(String repo, JSONArray a) {
 
    this.rep = repo;
    this.w = a;
    cons = new ArrayList<>();
    topMonth = new ArrayList<>();
+
 
   }
 
@@ -63,12 +74,10 @@ public class GH {
   static long codeLines;
   static long month;
   static String date;
-  static long t;
-  static long s;
-  static long th;
-  static long f;
-  static long fth;
-  static List<String> top5;
+  static Cons t;
+  static Cons s;
+  static Cons th;
+
 
   public Month(long code, long month) {
 
@@ -77,14 +86,12 @@ public class GH {
 
   }
 
-  public Month(String date, long top, long sec, long thd, long fth, long th) {
+  public Month(String date, Cons top, Cons sec, Cons thd) {
    this.date = date;
    this.t = top;
    this.s = sec;
    this.th = thd;
-   this.f = fth;
-   this.fth = th;
-   top5 = new ArrayList<>();
+
   }
  }
 
@@ -101,7 +108,8 @@ public class GH {
   getCons();
   calculateLines();
   getExactMonth();
-
+  createCSVFiles();
+  writeToCSV();
 
  }
 
@@ -220,7 +228,7 @@ public class GH {
 
  }
 
- public static void getExactMonth() {
+ public static void getExactMonth() throws IOException {
 
   for (Repos r : repoStats) {
    for (Month m : r.cons.get(0).months) {
@@ -235,48 +243,83 @@ public class GH {
   long top = 0;
   long second = 0;
   long third = 0;
-  long fourth = 0;
-  long fifth = 0;
-  Month mo = new Month(m, top, second, third, fourth, fifth);
+  Cons c1 = new Cons();
+  Cons c2 = new Cons();
+  Cons c3 = new Cons();
+
+  Month mo = new Month(m, c1, c2, c3);
   r.topMonth.add(mo);
   for (Cons c : r.cons) {
    for (Month mt : c.months) {
     if (mt.date.equals(m)) {
      if (mt.codeLines > top) {
       top = mt.codeLines;
-      mo.t = top;
-      mo.top5.set(0, c.name);
+      c1.lines = mt.codeLines;
+      c1.name = c.name;
 
-     } else if (mt.codeLines < top && mt.codeLines > second && mt.codeLines > third
-             && mt.codeLines > fourth && mt.codeLines > fifth) {
+     } else if (mt.codeLines < top && mt.codeLines > second) {
       second = mt.codeLines;
-      mo.s = second;
-      mo.top5.set(1,c.name);
+      c2.lines = mt.codeLines;
+      c2.name = c.name;
 
-     } else if (mt.codeLines < top && mt.codeLines < second && mt.codeLines > third
-             && mt.codeLines > fourth && mt.codeLines > fifth) {
+     } else if (mt.codeLines < top && mt.codeLines < second && mt.codeLines > third) {
       third = mt.codeLines;
-      mo.th = third;
-      mo.top5.set(2,c.name);
+      c3.lines = mt.codeLines;
+      c3.name = c.name;
 
-     } else if (mt.codeLines < top && mt.codeLines < second && mt.codeLines < third
-             && mt.codeLines > fourth && mt.codeLines > fifth) {
-      fourth = mt.codeLines;
-      mo.f = fourth;
-      mo.top5.set(3,c.name);
 
-     } else if (mt.codeLines < top && mt.codeLines < second && mt.codeLines < third
-             && mt.codeLines < fourth && mt.codeLines > fifth) {
-      fifth = mt.codeLines;
-      mo.fth = fifth;
-      mo.top5.set(4,c.name);
      }
     }
+
    }
 
   }
+
+
+ }
+
+ public static void createCSVFiles(){
+
+  for(String r: repos){
+    File f = new File("C:\\Users\\maxri\\OneDrive\\Desktop\\CSV\\" + r + ".csv");
+  }
+
+ }
+
+ public static void writeToCSV(){
+   for(Repos r : repoStats){
+    try {
+
+     FileWriter output = new FileWriter("C:\\Users\\maxri\\OneDrive\\Desktop\\CSV" + r.rep + ".csv");
+     CSVWriter w = new CSVWriter(output);
+
+     String[] header = { "Month", "Name", "Lines" };
+     w.writeNext(header);
+     for(Month m : r.topMonth){
+      String[] data = { m.date, m.t.name ,Long.toString(m.t.lines)};
+      w.writeNext(data);
+      String[] data2 = {m.date, m.s.name, Long.toString(m.s.lines)};
+      w.writeNext(data2);
+      String[] data3 = {m.date,m.th.name, Long.toString(m.th.lines)};
+      w.writeNext(data3);
+     }
+
+     w.close();
+    }
+    catch (IOException e) {
+     e.printStackTrace();
+    }
+   }
  }
 }
+
+
+
+
+
+
+
+
 
 
 
